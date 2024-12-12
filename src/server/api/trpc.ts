@@ -9,11 +9,9 @@
 
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { type Session } from "next-auth";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 
 /**
@@ -24,9 +22,8 @@ import { db } from "~/server/db";
  * These allow you to access things when processing a request, like the database, the session, etc.
  */
 
-interface CreateContextOptions {
-  session: Session | null;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface CreateContextOptions {}
 
 /**
  * This helper generates the "internals" for a tRPC context. If you need to use it, you can export
@@ -40,7 +37,6 @@ interface CreateContextOptions {
  */
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
-    session: opts.session,
     db,
   };
 };
@@ -54,12 +50,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
 export const createTRPCContext = async (opts: CreateNextContextOptions) => {
   const { req, res } = opts;
 
-  // Get the session from the server using the getServerSession wrapper function
-  const session = await auth(req, res);
-
-  return createInnerTRPCContext({
-    session,
-  });
+  return createInnerTRPCContext({});
 };
 
 /**
@@ -148,13 +139,7 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
   .use(({ ctx, next }) => {
-    if (!ctx.session || !ctx.session.user) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
     return next({
-      ctx: {
-        // infers the `session` as non-nullable
-        session: { ...ctx.session, user: ctx.session.user },
-      },
+      ctx: {},
     });
   });
