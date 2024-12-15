@@ -4,15 +4,16 @@ import { type AppType } from "next/app";
 import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
+import Layout from '~/components/layout';
 
 const MyApp: AppType = ({
   Component,
   pageProps,
 }) => {
   return (
-    <div className={GeistSans.className}>
+    <Layout className={GeistSans.className}>
       <Component {...pageProps} />
-    </div>
+    </Layout>
   );
 };
 
